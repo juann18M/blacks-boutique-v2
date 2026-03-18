@@ -1,4 +1,4 @@
-import { db } from "@/lib/db"; // o donde tengas tu conexión
+import { db } from "@/lib/db";
 
 export async function GET() {
   try {
@@ -6,13 +6,13 @@ export async function GET() {
     conn.release();
 
     return Response.json({ ok: true, message: "Conectado" });
-  } catch (error) {
+  } catch (error: any) {
     console.error("ERROR REAL:", error);
 
     return Response.json({
       ok: false,
-      error: error.message,
-      code: error.code,
+      error: error?.message || "Error desconocido",
+      code: error?.code || null,
     });
   }
 }
