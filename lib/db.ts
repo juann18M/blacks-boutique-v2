@@ -10,6 +10,6 @@ export const db = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   ssl: {
-    rejectUnauthorized: false,
+    minVersion: "TLSv1.2"
   },
 });
