@@ -156,7 +156,7 @@ export default function ProductosPage() {
       const total = productosFiltrados.length;
       setTotalPaginas(Math.ceil(total / itemsPorPagina));
       
-      const inicio = (pagina - 1) * itemsPorPagina;
+      const inicio = Math.min((pagina - 1) * itemsPorPagina, productosFiltrados.length);
       const fin = inicio + itemsPorPagina;
       setProductos(productosFiltrados.slice(inicio, fin));
       setUltimaActualizacion(new Date());
@@ -276,6 +276,10 @@ export default function ProductosPage() {
       setGrupos([]);
     }
   }, [productos]);
+
+  useEffect(() => {
+  setPagina(1);
+}, [filtroStock, sucursalActiva]);
 
   const organizarPorUbicacion = () => {
     const gruposMap = new Map<string, Producto[]>();
