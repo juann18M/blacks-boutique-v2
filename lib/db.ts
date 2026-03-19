@@ -9,7 +9,9 @@ export const db = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
-  ssl: {
-    ca: process.env.DB_SSL_CA,
-  },
+  ssl: process.env.DB_SSL_CA
+  ? {
+      ca: process.env.DB_SSL_CA.replace(/\\n/g, '\n'),
+    }
+  : undefined,
 });
