@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
-import { existsSync } from 'fs';
+import cloudinary from '@/lib/cloudinary';
 
 // Función para generar etiqueta aleatoria
 function generarEtiqueta(longitud: number = 8): string {
@@ -50,7 +48,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST - Crear nuevo producto con imagen
+// POST - Crear nuevo producto con imagen (CLOUDINARY)
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
@@ -74,6 +72,7 @@ export async function POST(request: NextRequest) {
 
     let imagenPath = null;
 
+    // 🔥 SUBIDA A CLOUDINARY
     if (imagenFile && imagenFile.size > 0) {
       const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
       if (!validTypes.includes(imagenFile.type)) {
@@ -88,21 +87,20 @@ export async function POST(request: NextRequest) {
         }, { status: 400 });
       }
 
-      const uploadDir = path.join(process.cwd(), 'public/uploads/productos');
-      if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true });
-      }
-
       const bytes = await imagenFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      
-      const fileExtension = imagenFile.type.split('/')[1];
-      const fileName = `producto_${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExtension}`;
-      const filePath = path.join(uploadDir, fileName);
-      
-      await writeFile(filePath, buffer);
-      
-      imagenPath = `/uploads/productos/${fileName}`;
+
+      const result: any = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "productos" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      imagenPath = result.secure_url;
     }
 
     // Generar etiqueta única
@@ -136,6 +134,7 @@ export async function POST(request: NextRequest) {
         etiqueta, nombre, color, talla, precio, stock, 
         ubicacion, imagen, descripcion, sucursal_id, usuario_registro_id
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+
       [
         etiqueta, 
         nombre, 
