@@ -157,13 +157,15 @@ export async function POST(request: NextRequest) {
     /* ======================
        REGISTRAR TRASLADO (SIN producto_destino_id)
     ====================== */
-    const [result]: any = await connection.query(
-      `INSERT INTO traslados 
-      (producto_id, cantidad, sucursal_origen_id, sucursal_destino_id, usuario_id, motivo)
-      VALUES (?, ?, ?, ?, ?, ?)`,
-      [producto_id, cantidad, sucursal_origen_id, sucursal_destino_id, usuario_id, motivo || null]
-    );
+    // generar folio
+const folio = `TR-${Date.now()}`;
 
+const [result]: any = await connection.query(
+  `INSERT INTO traslados 
+  (folio, producto_id, cantidad, sucursal_origen_id, sucursal_destino_id, usuario_id, motivo)
+  VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  [folio, producto_id, cantidad, sucursal_origen_id, sucursal_destino_id, usuario_id, motivo || null]
+);
     await connection.commit();
 
     /* ======================
